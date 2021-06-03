@@ -1,0 +1,13 @@
+- hosts: worker1
+  become: true
+
+  tasks:
+    - name: Ensure NFS common is installed.
+      apt: name=nfs-common state=present update_cache=yes
+
+    - name: Create mountable dir
+      file: path=/mnt/nfsclient state=directory mode=777 owner=root group=root
+
+    - name: Mount volume
+      shell: mount 192.168.56.10:/mnt/nfsdir /mnt/nfsclient
+

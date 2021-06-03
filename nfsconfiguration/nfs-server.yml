@@ -1,0 +1,22 @@
+- hosts: localhost
+  become: true
+
+  tasks:
+
+    - name: Ensure NFS utilities are installed.
+      apt: name={{ item }} state=present update_cache=yes
+      with_items:
+        - nfs-common
+        - nfs-kernel-server
+    
+    - name: Create mountable dir
+      file: path=/mnt/nfsdir state=directory mode=777 owner=root group=root
+
+    - name: copy /etc/exports
+      template: src=exports.j2 dest=/etc/exports owner=root group=root
+
+    - name: Use the exportfs command to export all shared directories you registered in that file
+      shell: exportfs -a
+
+    - name: restart nfs server
+      service: name=nfs-kernel-server state=restarted
