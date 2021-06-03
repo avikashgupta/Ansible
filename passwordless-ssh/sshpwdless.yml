@@ -1,0 +1,21 @@
+- hosts: localhost
+  become: true
+  become_user: root
+  tasks:
+    - stat:
+        path: /home/avikash/.ssh/id_rsa
+      register: output
+
+    - name: Generating ssh key pair
+      command: ssh-keygen 
+      when: output.stat.exists == false
+
+    - debug: 
+        msg: "Key pair already exists. Using the same key for this task now"
+      when: output.stat.exists
+
+    - name: Copy public key to the worker nodes
+      command:  ssh-copy-id /home/avikash/.ssh/id_rsa root@"{{ item }}"
+
+      with_items:
+        - 192.168.56.12
